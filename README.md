@@ -1,30 +1,50 @@
-# Agent development platform
+# AI Agent Manager
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Next.js 14 + TypeScript + Tailwind で構築された、コンサル型AIの対話 UI とワークフロー（Pain 分析 → ソリューション設計 → エージェント生成）を備えたアプリです。OpenAI の Chat Completions をストリーミングで利用します。
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/bonginkan-projects/v0-agent-development-platform)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/wv6DAg3yIko)
+## 必要条件
+- Node.js 18 以上（LTS 推奨）
+- pnpm（推奨）
 
-## Overview
+## セットアップ
+1) 依存関係のインストール
+```
+pnpm install
+```
+2) 環境変数の設定
+```
+cp .env.local.sample .env.local
+# .env.local を編集して OPENAI_API_KEY を設定
+```
+3) 開発サーバー起動
+```
+pnpm dev
+# http://localhost:3000 にアクセス
+```
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## スクリプト
+- `pnpm dev` ローカル開発サーバーを起動
+- `pnpm build` 本番ビルドを作成（`.next/`）
+- `pnpm start` 本番ビルドを起動
+- `pnpm lint` Next.js ルールでの ESLint 実行
 
-## Deployment
+## プロジェクト構成
+- `app/` Next.js App Router（`page.tsx`、`layout.tsx`、`app/api/chat/route.ts` など）
+- `components/` 機能別/共通 UI（`components/ui/*` は shadcn 由来のプリミティブ）
+- `hooks/` カスタムフック（例: `use-workflow.ts`）
+- `lib/` ユーティリティとコアロジック（例: `workflow-engine.ts`）
+- `styles/` グローバル CSS（Tailwind）
+- `public/` 静的アセット
 
-Your project is live at:
+## 環境変数
+- `OPENAI_API_KEY` 必須。`app/api/chat/route.ts` で OpenAI にアクセスします。
+- （任意）`SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY` は Cloud Run デプロイ UI の例で使用。
+`.env*` は `.gitignore` 済みのため、秘密情報は安全に管理してください。
 
-**[https://vercel.com/bonginkan-projects/v0-agent-development-platform](https://vercel.com/bonginkan-projects/v0-agent-development-platform)**
+## 開発メモ（ストリーミング仕様）
+- サーバー: `app/api/chat/route.ts` が OpenAI（`gpt-4o-mini`）にストリーミングで接続し、`0:{...}` 形式の行でクライアントへ転送します（`type: "text-delta"`）。
+- クライアント: `components/chat-interface.tsx` が上記フォーマットを前提に UI を逐次更新します。プロトコル変更時は両者を同時に更新してください。
 
-## Build your app
-
-Continue building your app on:
-
-**[https://v0.app/chat/projects/wv6DAg3yIko](https://v0.app/chat/projects/wv6DAg3yIko)**
-
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## デプロイ
+- Vercel 推奨。プロジェクト設定で `OPENAI_API_KEY` を追加してください。
+- Cloud Run 用の UI（`components/cloud-run-deployment.tsx`）はモック挙動です。実運用では CI/CD とマニフェスト管理を整備してください。

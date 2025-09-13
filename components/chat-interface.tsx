@@ -201,6 +201,14 @@ export function ChatInterface() {
     setIsComposing(false)
   }
 
+  const TimeStamp = () => {
+    const [time, setTime] = useState("")
+    useEffect(() => {
+      setTime(new Date().toLocaleTimeString())
+    }, [])
+    return <span suppressHydrationWarning>{time}</span>
+  }
+
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="border-b border-border p-4">
@@ -231,7 +239,9 @@ export function ChatInterface() {
                 className={`max-w-[80%] p-4 ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}
               >
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                <p className="text-xs opacity-70 mt-2">{new Date().toLocaleTimeString()}</p>
+                <p className="text-xs opacity-70 mt-2">
+                  <TimeStamp />
+                </p>
               </Card>
             </div>
           ))}
